@@ -1,0 +1,16 @@
+R_DEF: Internal format may change without notice
+local
+color bitchat_primary
+color bitchat_primary_dark
+color bitchat_secondary
+color black
+color white
+string app_name
+string no_peers_found
+string permission_bluetooth_message
+string permission_bluetooth_title
+string permission_location_message
+string permission_location_title
+string scanning_peers
+string welcome_message
+style Theme.BitChat

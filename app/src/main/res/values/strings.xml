@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">BitChat</string>
+    <string name="welcome_message">Welcome to BitChat!</string>
+    <string name="scanning_peers">Scanning for peers...</string>
+    <string name="no_peers_found">No peers found nearby</string>
+    <string name="permission_bluetooth_title">Bluetooth Permission Required</string>
+    <string name="permission_bluetooth_message">BitChat needs Bluetooth access to connect with nearby devices</string>
+    <string name="permission_location_title">Location Permission Required</string>
+    <string name="permission_location_message">Location access is required for Bluetooth LE scanning</string>
+</resources>

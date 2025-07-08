@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bitchat_primary">#FF0969DA</color>
+    <color name="bitchat_primary_dark">#FF003258</color>
+    <color name="bitchat_secondary">#FF2D5A41</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <string name="app_name">BitChat</string>
+    <string name="no_peers_found">No peers found nearby</string>
+    <string name="permission_bluetooth_message">BitChat needs Bluetooth access to connect with nearby devices</string>
+    <string name="permission_bluetooth_title">Bluetooth Permission Required</string>
+    <string name="permission_location_message">Location access is required for Bluetooth LE scanning</string>
+    <string name="permission_location_title">Location Permission Required</string>
+    <string name="scanning_peers">Scanning for peers...</string>
+    <string name="welcome_message">Welcome to BitChat!</string>
+    <style name="Theme.BitChat" parent="android:Theme.Material.DayNight.NoActionBar"/>
+</resources>

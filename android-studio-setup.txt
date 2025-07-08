@@ -1,0 +1,13 @@
+# Add Android Studio to Windows PATH
+# 1. Find your Android Studio installation path (usually one of these):
+#    C:\Program Files\Android\Android Studio\bin\studio64.exe
+#    C:\Users\[Username]\AppData\Local\Android\Studio\bin\studio64.exe
+
+# 2. Add to PATH via PowerShell (run as Administrator):
+# $env:PATH += ";C:\Program Files\Android\Android Studio\bin"
+
+# 3. Or add via System Properties:
+#    - Windows Key + R → sysdm.cpl → Advanced → Environment Variables
+#    - Add to System PATH: C:\Program Files\Android\Android Studio\bin
+
+# 4. Then you can use: studio.bat path\to\project
