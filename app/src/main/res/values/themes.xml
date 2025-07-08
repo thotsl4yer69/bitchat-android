@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.BitChat" parent="android:Theme.Material.DayNight.NoActionBar" />
+    <style name="Theme.BitChat" parent="Theme.AppCompat.DayNight.NoActionBar" />
 </resources>
