@@ -1,8 +1,8 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("kotlin-kapt")
     id("kotlin-parcelize")
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 android {
@@ -86,9 +86,6 @@ dependencies {
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-    
-    // Bluetooth and permissions
-    implementation("androidx.bluetooth:bluetooth-ktx:1.0.0-alpha02")
     
     // Crypto libraries for encryption
     implementation("org.bouncycastle:bcprov-jdk15on:1.70")
