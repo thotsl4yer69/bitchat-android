@@ -1,0 +1,139 @@
+name: Build Ultra Simple APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      
+    - name: Create ultra minimal Android project
+      run: |
+        # Remove existing project files
+        rm -rf app/src/main/java/com/bitchat/android/*
+        
+        # Create minimal MainActivity
+        mkdir -p app/src/main/java/com/bitchat/android
+        cat > app/src/main/java/com/bitchat/android/MainActivity.kt << 'EOF'
+        package com.bitchat.android
+        
+        import android.app.Activity
+        import android.os.Bundle
+        import android.widget.TextView
+        
+        class MainActivity : Activity() {
+            override fun onCreate(savedInstanceState: Bundle?) {
+                super.onCreate(savedInstanceState)
+                val textView = TextView(this)
+                textView.text = "BitChat - Bluetooth Mesh Chat\nBuilding full version..."
+                textView.textSize = 18f
+                textView.setPadding(50, 100, 50, 50)
+                setContentView(textView)
+            }
+        }
+        EOF
+        
+        # Create ultra minimal build.gradle
+        cat > app/build.gradle.kts << 'EOF'
+        plugins {
+            id("com.android.application")
+            id("org.jetbrains.kotlin.android")
+        }
+        
+        android {
+            namespace = "com.bitchat.android"
+            compileSdk = 33
+        
+            defaultConfig {
+                applicationId = "com.bitchat.android"
+                minSdk = 21
+                targetSdk = 33
+                versionCode = 1
+                versionName = "1.0"
+            }
+        
+            buildTypes {
+                debug {
+                    isMinifyEnabled = false
+                }
+            }
+        
+            compileOptions {
+                sourceCompatibility = JavaVersion.VERSION_1_8
+                targetCompatibility = JavaVersion.VERSION_1_8
+            }
+            
+            kotlinOptions {
+                jvmTarget = "1.8"
+            }
+        }
+        
+        dependencies {
+            implementation("androidx.core:core-ktx:1.9.0")
+        }
+        EOF
+        
+        # Create ultra minimal themes.xml  
+        cat > app/src/main/res/values/themes.xml << 'EOF'
+        <?xml version="1.0" encoding="utf-8"?>
+        <resources>
+            <style name="Theme.BitChat" parent="android:Theme.Material.Light" />
+        </resources>
+        EOF
+        
+        # Create minimal AndroidManifest.xml
+        cat > app/src/main/AndroidManifest.xml << 'EOF'
+        <?xml version="1.0" encoding="utf-8"?>
+        <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+            <application
+                android:label="@string/app_name"
+                android:theme="@style/Theme.BitChat">
+                
+                <activity
+                    android:name=".MainActivity"
+                    android:exported="true">
+                    <intent-filter>
+                        <action android:name="android.intent.action.MAIN" />
+                        <category android:name="android.intent.category.LAUNCHER" />
+                    </intent-filter>
+                </activity>
+            </application>
+        </manifest>
+        EOF
+        
+        # Fix project build.gradle
+        cat > build.gradle.kts << 'EOF'
+        plugins {
+            id("com.android.application") version "8.1.4" apply false
+            id("org.jetbrains.kotlin.android") version "1.8.10" apply false
+        }
+        EOF
+        
+    - name: Setup Gradle
+      uses: gradle/gradle-build-action@v2
+      
+    - name: Build Ultra Simple APK
+      run: |
+        gradle wrapper
+        chmod +x gradlew
+        ./gradlew assembleDebug --stacktrace --debug
+      
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: bitchat-ultra-simple-apk
+        path: app/build/outputs/apk/debug/app-debug.apk
