@@ -1,9 +1,7 @@
-name: Build BitChat APK
+name: Build BitChat APK (Simple)
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
     branches: [ main ]
   workflow_dispatch:
 
@@ -21,23 +19,19 @@ jobs:
         distribution: 'temurin'
         
     - name: Setup Android SDK
-      uses: android-actions/setup-android@v2
+      uses: android-actions/setup-android@v3
       
-    - name: Cache Gradle packages
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-
-          
     - name: Setup Gradle
       uses: gradle/gradle-build-action@v2
       
+    - name: Create gradlew wrapper
+      run: gradle wrapper
+      
+    - name: Make gradlew executable
+      run: chmod +x gradlew
+      
     - name: Build Debug APK
-      run: gradle assembleDebug
+      run: ./gradlew assembleDebug --stacktrace
       
     - name: Upload APK
       uses: actions/upload-artifact@v4
