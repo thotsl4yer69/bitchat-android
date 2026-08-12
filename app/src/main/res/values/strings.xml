@@ -1,10 +1,10 @@
 <resources>
-    <string name="app_name">BitChat</string>
-    <string name="welcome_message">Welcome to BitChat!</string>
-    <string name="scanning_peers">Scanning for peers...</string>
-    <string name="no_peers_found">No peers found nearby</string>
-    <string name="permission_bluetooth_title">Bluetooth Permission Required</string>
-    <string name="permission_bluetooth_message">BitChat needs Bluetooth access to connect with nearby devices</string>
-    <string name="permission_location_title">Location Permission Required</string>
-    <string name="permission_location_message">Location access is required for Bluetooth LE scanning</string>
+    <string name="app_name">BitNow</string>
+    <string name="welcome_message">Welcome to BitNow</string>
+    <string name="scanning_peers">Scanning for nearby compatible devices…</string>
+    <string name="no_peers_found">No compatible peers nearby</string>
+    <string name="permission_bluetooth_title">Bluetooth access required</string>
+    <string name="permission_bluetooth_message">BitNow uses Bluetooth for local proximity discovery and mesh communication.</string>
+    <string name="permission_location_title">Nearby-device permission</string>
+    <string name="permission_location_message">Older Android versions require location permission for Bluetooth LE scanning. BitNow encounter profiles do not publish your exact location.</string>
 </resources>
