@@ -25,4 +25,12 @@ APP_BASE_NAME=`basename "$0"`
 
 CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
 
-exec "$JAVACMD" $DEFAULT_JVM_OPTS $JAVA_OPTS $GRADLE_OPTS "\"-Dorg.gradle.appname=$APP_BASE_NAME\"" -classpath "\"$CLASSPATH\"" org.gradle.wrapper.GradleWrapperMain "$@"
+if [ -z "$JAVA_HOME" ]; then
+    echo "ERROR: JAVA_HOME is not set" >&2
+    exit 1
+fi
+
+exec "$JAVA_HOME/bin/java" $DEFAULT_JVM_OPTS $JAVA_OPTS $GRADLE_OPTS \
+    "-Dorg.gradle.appname=$APP_BASE_NAME" \
+    -classpath "$CLASSPATH" \
+    org.gradle.wrapper.GradleWrapperMain "$@"
