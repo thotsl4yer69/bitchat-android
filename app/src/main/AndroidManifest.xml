@@ -28,20 +28,18 @@
         android:required="true" />
 
     <application
-        android:allowBackup="true"
-        android:dataExtractionRules="@xml/data_extraction_rules"
-        android:fullBackupContent="@xml/backup_rules"
+        android:allowBackup="false"
         android:icon="@android:drawable/ic_dialog_email"
         android:label="@string/app_name"
         android:roundIcon="@android:drawable/ic_dialog_email"
         android:supportsRtl="true"
-        android:theme="@style/Theme.BitChat"
+        android:theme="@style/Theme.BitNow"
         tools:targetApi="31">
         
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.BitChat"
+            android:theme="@style/Theme.BitNow"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>

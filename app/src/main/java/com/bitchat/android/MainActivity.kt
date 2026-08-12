@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bitchat.android.mesh.BleMeshService
-import com.bitchat.android.ui.theme.BitChatTheme
+import com.bitchat.android.ui.theme.BitNowTheme
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -70,7 +70,7 @@ class MainActivity : ComponentActivity() {
         requestPermissions()
         
         setContent {
-            BitChatTheme {
+            BitNowTheme {
                 ChatScreen()
             }
         }
@@ -151,7 +151,7 @@ fun ChatScreen(viewModel: ChatViewModel = viewModel()) {
             title = {
                 Column {
                     Text(
-                        text = currentRoom ?: "BitChat",
+                        text = currentRoom ?: "BitNow",
                         style = MaterialTheme.typography.titleMedium
                     )
                     Text(
@@ -319,7 +319,7 @@ data class ChatMessage(
 @Preview(showBackground = true)
 @Composable
 fun ChatScreenPreview() {
-    BitChatTheme {
+    BitNowTheme {
         ChatScreen()
     }
 }

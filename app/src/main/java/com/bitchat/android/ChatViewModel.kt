@@ -27,7 +27,7 @@ class ChatViewModel : ViewModel() {
     
     init {
         // Add welcome message
-        addSystemMessage("Welcome to BitChat! Type /help for commands.")
+        addSystemMessage("Welcome to BitNow! Type /help for commands.")
         addSystemMessage("Scanning for nearby peers...")
     }
     
@@ -134,18 +134,9 @@ class ChatViewModel : ViewModel() {
     }
     
     private fun sendPrivateMessage(target: String, message: String) {
-        val privateMsg = ChatMessage(
-            id = UUID.randomUUID().toString(),
-            sender = _nickname.value,
-            content = "→ $target: $message",
-            timestamp = dateFormatter.format(Date()),
-            isPrivate = true
+        addSystemMessage(
+            "Private messaging is disabled until encrypted transport is available; nothing was sent."
         )
-        
-        _messages.value = _messages.value + privateMsg
-        
-        // TODO: Send encrypted private message via BLE
-        // bleMeshService.sendPrivateMessage(target, message)
     }
     
     fun receiveMessage(message: ChatMessage) {

@@ -67,7 +67,7 @@ class BleMeshService(private val context: Context) {
     private var nickname = "Anonymous${Random.nextInt(1000, 9999)}"
     
     fun initialize() {
-        Log.d(TAG, "Initializing BitChat BLE Mesh Service")
+        Log.d(TAG, "Initializing BitNow BLE Mesh Service")
         setupGattServer()
         startAdvertising()
         startScanning()
@@ -81,6 +81,11 @@ class BleMeshService(private val context: Context) {
     }
     
     fun sendMessage(content: String, room: String? = null, isPrivate: Boolean = false) {
+        if (isPrivate) {
+            Log.e(TAG, "Blocked private message: encrypted transport is not available")
+            return
+        }
+
         val message = MeshMessage(
             id = UUID.randomUUID().toString(),
             type = if (isPrivate) MSG_TYPE_PRIVATE else MSG_TYPE_CHAT,
@@ -374,6 +379,14 @@ class BleMeshService(private val context: Context) {
     private fun handleReceivedData(data: ByteArray, senderAddress: String) {
         try {
             val message = deserializeMessage(data)
+
+            // The legacy Android transport has no private-message decryption.
+            // Drop these packets before display or relay so sensitive BitNow
+            // controls can never traverse this plaintext compatibility mesh.
+            if (message.type == MSG_TYPE_PRIVATE) {
+                Log.w(TAG, "Dropped private message: encrypted transport is not available")
+                return
+            }
             
             // Check if we've seen this message before
             if (messageCache.containsKey(message.id)) {
@@ -389,9 +402,6 @@ class BleMeshService(private val context: Context) {
                 }
                 MSG_TYPE_CHAT -> {
                     handleChatMessage(message)
-                }
-                MSG_TYPE_PRIVATE -> {
-                    handlePrivateMessage(message)
                 }
                 MSG_TYPE_JOIN_ROOM -> {
                     handleJoinRoom(message)
@@ -431,12 +441,6 @@ class BleMeshService(private val context: Context) {
     private fun handleChatMessage(message: MeshMessage) {
         _messages.value = _messages.value + message
         Log.d(TAG, "Chat message from ${message.sender}: ${message.content}")
-    }
-    
-    private fun handlePrivateMessage(message: MeshMessage) {
-        // TODO: Implement decryption for private messages
-        _messages.value = _messages.value + message
-        Log.d(TAG, "Private message from ${message.sender}")
     }
     
     private fun handleJoinRoom(message: MeshMessage) {

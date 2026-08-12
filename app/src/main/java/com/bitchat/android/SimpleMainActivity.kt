@@ -8,7 +8,7 @@ class MainActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val textView = TextView(this)
-        textView.text = "BitChat v1.0\n\nBluetooth Mesh Chat\n\nWorking APK!\n\nFull features coming soon..."
+        textView.text = "BitNow preview\n\nEncrypted encounter transport is not enabled in this build."
         textView.textSize = 20f
         textView.setPadding(50, 100, 50, 50)
         setContentView(textView)

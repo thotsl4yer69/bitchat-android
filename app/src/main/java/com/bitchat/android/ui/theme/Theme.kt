@@ -78,7 +78,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun BitChatTheme(
+fun BitNowTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
