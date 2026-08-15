@@ -42,6 +42,11 @@ import com.bitchat.android.util.hexEncodedString
 import com.bitchat.android.features.voice.LiveVoicePreferences
 import com.bitchat.android.features.voice.LiveVoiceTarget
 import com.bitchat.android.features.voice.VoiceRecorder
+import com.bitchat.android.bitnow.BitNowProfile
+import com.bitchat.android.bitnow.BitNowProfileStore
+import com.bitchat.android.bitnow.BitNowRegistry
+import com.bitchat.android.bitnow.BitNowRelationshipStore
+import com.bitchat.android.services.MessageRouter
 
 private data class ConversationLiveIdentityState(
     val connectedPeerIDs: List<String>,
@@ -388,6 +393,9 @@ class ChatViewModel(
     val peerNicknames: StateFlow<Map<String, String>> = state.peerNicknames
     val peerRSSI: StateFlow<Map<String, Int>> = state.peerRSSI
     val peerDirect: StateFlow<Map<String, Boolean>> = state.peerDirect
+    val bitNowProfiles = BitNowRegistry.profiles
+    val bitNowMyInterests = BitNowRelationshipStore.myInterests
+    val bitNowTheirInterests = BitNowRelationshipStore.theirInterests
     val showAppInfo: StateFlow<Boolean> = state.showAppInfo
     val showMeshPeerList: StateFlow<Boolean> = state.showMeshPeerList
     val privateChatSheetPeer: StateFlow<String?> = state.privateChatSheetPeer
@@ -418,6 +426,25 @@ class ChatViewModel(
         // Note: Mesh service delegate is now set by MainActivity
         loadAndInitialize()
         ContactDirectory.initialize(getApplication()) { mesh }
+        BitNowRelationshipStore.initialize(getApplication())
+        viewModelScope.launch {
+            var sharedWith = emptySet<String>()
+            state.connectedPeers.collect { peers ->
+                val active = peers.filter { it != mesh.myPeerID }.toSet()
+                BitNowRegistry.retain(active)
+                sharedWith = sharedWith intersect active
+                val localProfile = BitNowProfileStore.load(getApplication())
+                if (localProfile != null && localProfile.visible) {
+                    (active - sharedWith).forEach { peerID ->
+                        runCatching {
+                            MessageRouter.getInstance(getApplication(), mesh)
+                                .sendBitNowProfile(peerID, localProfile)
+                        }
+                    }
+                    sharedWith = sharedWith + active
+                }
+            }
+        }
         com.bitchat.android.services.AppStateStore.canonicalizePrivateChats()
         observeConversationDisplayNames()
         // Application startup performs the initial restore. Repeat it for every new UI owner
@@ -651,6 +678,30 @@ class ChatViewModel(
     
     // MARK: - Nickname Management
     
+    fun saveBitNowProfile(profile: BitNowProfile) {
+        BitNowProfileStore.save(getApplication(), profile)
+        connectedPeers.value
+            .filter { it != mesh.myPeerID }
+            .forEach { peerID ->
+                runCatching {
+                    MessageRouter.getInstance(getApplication(), mesh)
+                        .sendBitNowProfile(peerID, profile)
+                }
+            }
+    }
+
+    fun setBitNowInterest(peerID: String, interested: Boolean) {
+        BitNowRelationshipStore.setMine(getApplication(), peerID, interested)
+        runCatching {
+            MessageRouter.getInstance(getApplication(), mesh)
+                .sendBitNowInterest(peerID, interested)
+        }
+    }
+
+    fun openBitNowChat(peerID: String) {
+        showPrivateChatSheet(peerID)
+    }
+
     fun setNickname(newNickname: String) {
         state.setNickname(newNickname)
         dataManager.saveNickname(newNickname)

@@ -3,6 +3,8 @@ package com.bitchat.android.services
 import android.content.Context
 import android.util.Log
 import com.bitchat.android.favorites.FavoriteControlMessage
+import com.bitchat.android.bitnow.BitNowControlMessage
+import com.bitchat.android.bitnow.BitNowProfile
 import com.bitchat.android.mesh.MeshService
 import com.bitchat.android.model.ReadReceipt
 import com.bitchat.android.nostr.NostrTransport
@@ -193,6 +195,22 @@ class MessageRouter private constructor(
             nostr.sendFavoriteNotification(resolution.noiseKeyHex ?: toPeerID, isFavorite)
         }
     }
+
+    fun sendBitNowProfile(toPeerID: String, profile: BitNowProfile): RouteResult =
+        sendPrivate(
+            content = BitNowControlMessage.encodeProfile(profile),
+            toPeerID = toPeerID,
+            recipientNickname = "BitNow",
+            messageID = java.util.UUID.randomUUID().toString().uppercase()
+        )
+
+    fun sendBitNowInterest(toPeerID: String, interested: Boolean): RouteResult =
+        sendPrivate(
+            content = BitNowControlMessage.encodeInterest(interested),
+            toPeerID = toPeerID,
+            recipientNickname = "BitNow",
+            messageID = java.util.UUID.randomUUID().toString().uppercase()
+        )
 
     // Flush any queued messages for a specific peerID.
     // All outbox mutations happen under the router monitor so a concurrent enqueue cannot

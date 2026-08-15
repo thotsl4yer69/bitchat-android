@@ -2,6 +2,9 @@ package com.bitchat.android.mesh
 
 import android.util.Log
 import com.bitchat.android.favorites.FavoriteControlMessage
+import com.bitchat.android.bitnow.BitNowControlMessage
+import com.bitchat.android.bitnow.BitNowRegistry
+import com.bitchat.android.bitnow.BitNowRelationshipStore
 import com.bitchat.android.model.BitchatMessage
 import com.bitchat.android.model.BitchatMessageType
 import com.bitchat.android.model.AuthenticatedPeerState
@@ -92,8 +95,25 @@ class MessageHandler(private val myPeerID: String, private val appContext: andro
                     // Decode TLV private message exactly like iOS
                     val privateMessage = com.bitchat.android.model.PrivateMessagePacket.decode(noisePayload.data)
                     if (privateMessage != null) {
-                        // Handle favorite/unfavorite notifications embedded as PMs
+                        // BitNow metadata rides inside the existing authenticated/encrypted
+                        // private-message transport. It never becomes a visible chat message.
                         val pmContent = privateMessage.content
+                        when (val bitNow = BitNowControlMessage.parse(pmContent)) {
+                            is BitNowControlMessage.Profile -> {
+                                if (bitNow.profile.visible) BitNowRegistry.update(peerID, bitNow.profile)
+                                else BitNowRegistry.remove(peerID)
+                                sendDeliveryAck(privateMessage.messageID, peerID)
+                                return true
+                            }
+                            is BitNowControlMessage.Interest -> {
+                                BitNowRelationshipStore.setTheirs(peerID, bitNow.interested)
+                                sendDeliveryAck(privateMessage.messageID, peerID)
+                                return true
+                            }
+                            null -> Unit
+                        }
+
+                        // Handle favorite/unfavorite notifications embedded as PMs
                         if (FavoriteControlMessage.parse(pmContent) != null) {
                             handleFavoriteNotificationFromMesh(pmContent, peerID)
                             // Acknowledge delivery for UX parity

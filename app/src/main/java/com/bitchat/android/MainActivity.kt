@@ -39,7 +39,9 @@ import com.bitchat.android.onboarding.OnboardingCoordinator
 import com.bitchat.android.onboarding.OnboardingState
 import com.bitchat.android.onboarding.PermissionExplanationScreen
 import com.bitchat.android.onboarding.PermissionManager
-import com.bitchat.android.ui.ChatScreen
+import com.bitchat.android.bitnow.BitNowProfileSetupScreen
+import com.bitchat.android.bitnow.BitNowProfileStore
+import com.bitchat.android.bitnow.BitNowRootScreen
 import com.bitchat.android.ui.ChatViewModel
 import com.bitchat.android.ui.OrientationAwareActivity
 import com.bitchat.android.ui.theme.BitchatTheme
@@ -330,7 +332,18 @@ class MainActivity : OrientationAwareActivity() {
 
                 // Add the callback - this will be automatically removed when the activity is destroyed
                 onBackPressedDispatcher.addCallback(this, backCallback)
-                ChatScreen(viewModel = chatViewModel)
+                val bitNowContext = LocalContext.current
+                var bitNowProfileReady by remember {
+                    mutableStateOf(BitNowProfileStore.load(bitNowContext) != null)
+                }
+                if (bitNowProfileReady) {
+                    BitNowRootScreen(viewModel = chatViewModel)
+                } else {
+                    BitNowProfileSetupScreen { profile ->
+                        chatViewModel.saveBitNowProfile(profile)
+                        bitNowProfileReady = true
+                    }
+                }
             }
             
             OnboardingState.ERROR -> {
