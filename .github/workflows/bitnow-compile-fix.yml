@@ -1,0 +1,72 @@
+name: Fix BitNow Compile Integration
+
+on:
+  push:
+    branches: [ main ]
+    paths: [ '.github/workflows/bitnow-compile-fix.yml' ]
+
+permissions:
+  contents: write
+
+env:
+  TARGET_BRANCH: bitnow/upstream-full-rebrand
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TARGET_BRANCH }}
+          fetch-depth: 0
+
+      - name: Fix shared Wear sources and resource identifiers
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          wear = Path('wear/build.gradle.kts')
+          s = wear.read_text()
+          s = s.replace('applicationId = "com.bitchat.droid"', 'applicationId = "com.mazlabz.bitnow"', 1)
+          anchor = '    "com/bitchat/android/favorites/**",\n'
+          addition = '''    "com/bitchat/android/favorites/**",\n    "com/bitchat/android/bitnow/BitNowProfile.kt",\n    "com/bitchat/android/bitnow/BitNowProfileCodec.kt",\n    "com/bitchat/android/bitnow/BitNowControlMessage.kt",\n    "com/bitchat/android/bitnow/BitNowRegistry.kt",\n    "com/bitchat/android/bitnow/BitNowRelationshipStore.kt",\n'''
+          if anchor not in s:
+              raise SystemExit('wear shared-source anchor missing')
+          s = s.replace(anchor, addition, 1)
+          wear.write_text(s)
+
+          # Keep source-code resource identifiers stable; only displayed branding changes.
+          for path in Path('app/src/main/res').glob('values*/strings.xml'):
+              text = path.read_text()
+              text = re.sub(
+                  r'name="([^"]*?)BitNow([^"]*?)"',
+                  lambda m: f'name="{m.group(1)}bitchat{m.group(2)}"',
+                  text,
+              )
+              text = re.sub(
+                  r'<string name="app_name">.*?</string>',
+                  '<string name="app_name">BitNow</string>',
+                  text,
+                  flags=re.DOTALL,
+              )
+              path.write_text(text)
+
+          for path in Path('wear/src/main/res').glob('values*/strings.xml'):
+              text = path.read_text()
+              text = re.sub(
+                  r'<string name="app_name">.*?</string>',
+                  '<string name="app_name">BitNow</string>',
+                  text,
+                  flags=re.DOTALL,
+              )
+              path.write_text(text)
+          PY
+
+      - name: Commit fixes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/src/main/res wear/build.gradle.kts wear/src/main/res
+          git commit -m "fix(bitnow): compile shared Wear transport and preserve resource IDs"
+          git push origin HEAD:${TARGET_BRANCH}
