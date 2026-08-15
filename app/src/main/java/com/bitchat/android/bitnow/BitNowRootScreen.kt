@@ -4,14 +4,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bitchat.android.ui.ChatScreen
@@ -42,7 +41,13 @@ fun BitNowRootScreen(viewModel: ChatViewModel) {
     ) { padding ->
         Box(Modifier.padding(padding)) {
             when (tab) {
-                BitNowTab.NEARBY -> BitNowNearbyScreen(viewModel)
+                BitNowTab.NEARBY -> BitNowNearbyScreen(
+                    viewModel = viewModel,
+                    onOpenChat = { peerId ->
+                        viewModel.openBitNowChat(peerId)
+                        tab = BitNowTab.MESSAGES
+                    }
+                )
                 BitNowTab.MESSAGES -> ChatScreen(viewModel = viewModel)
             }
         }
@@ -127,7 +132,10 @@ fun BitNowProfileSetupScreen(
 }
 
 @Composable
-private fun BitNowNearbyScreen(viewModel: ChatViewModel) {
+private fun BitNowNearbyScreen(
+    viewModel: ChatViewModel,
+    onOpenChat: (String) -> Unit
+) {
     val connected by viewModel.connectedPeers.collectAsStateWithLifecycle()
     val profiles by viewModel.bitNowProfiles.collectAsStateWithLifecycle()
     val nicknames by viewModel.peerNicknames.collectAsStateWithLifecycle()
@@ -174,10 +182,7 @@ private fun BitNowNearbyScreen(viewModel: ChatViewModel) {
             val id = peerId.lowercase()
             val liked = id in mine
             val match = liked && id in theirs
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp)
-            ) {
+            Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp)) {
                 Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Column(Modifier.weight(1f)) {
@@ -197,7 +202,7 @@ private fun BitNowNearbyScreen(viewModel: ChatViewModel) {
                         Button(onClick = { viewModel.setBitNowInterest(peerId, !liked) }) {
                             Text(if (liked) "Interested ✓" else "Interested")
                         }
-                        OutlinedButton(onClick = { viewModel.openBitNowChat(peerId) }) {
+                        OutlinedButton(onClick = { onOpenChat(peerId) }) {
                             Text("Message")
                         }
                     }
