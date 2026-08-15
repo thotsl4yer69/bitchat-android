@@ -27,9 +27,12 @@ jobs:
           git clone --depth 1 "$UPSTREAM_REPO" /tmp/bitchat-upstream
           git -C /tmp/bitchat-upstream rev-parse HEAD > /tmp/upstream-sha
 
-      - name: Replace branch tree with upstream
+      - name: Replace branch tree with upstream without touching workflows
         run: |
-          rsync -a --delete --exclude '.git/' /tmp/bitchat-upstream/ ./
+          rsync -a --delete \
+            --exclude '.git/' \
+            --exclude '.github/workflows/' \
+            /tmp/bitchat-upstream/ ./
 
       - name: Apply BitNow rebrand and product layer
         run: |
@@ -49,8 +52,7 @@ jobs:
           s = s.replace('The sidegroup chat', 'Meet nearby. Message privately. No central account.')
           strings.write_text(s)
 
-          readme = Path('README.md')
-          readme.write_text('''# BitNow Android\n\nBitNow is a proximity-first decentralized Android client built on the production upstream BitChat Android transport.\n\n## Architecture\n\nBitNow deliberately retains upstream Bluetooth LE mesh discovery, packet framing, multi-hop routing, Noise private-message sessions, foreground connectivity service, Wi-Fi Aware support and Nostr transport. Product behavior is layered above those components instead of replacing them.\n\n## Product\n\n- 18+ local profiles\n- nearby-first discovery\n- local/on-device identity and profile state\n- private direct messaging over upstream encrypted sessions\n- no phone-number requirement\n- no central account requirement\n- offline BLE operation retained\n- Nostr fallback retained\n\n## Build\n\n```bash\n./gradlew test\n./gradlew assembleDebug\n```\n\nGitHub Actions publishes the debug build as `bitnow-debug-apk`.\n\n## Upstream and licensing\n\nBased on `permissionlesstech/bitchat-android`. The upstream license is retained unchanged. See `UPSTREAM.md` and `UPSTREAM_COMMIT`.\n''')
+          Path('README.md').write_text('''# BitNow Android\n\nBitNow is a proximity-first decentralized Android client built on the production upstream BitChat Android transport.\n\n## Architecture\n\nBitNow deliberately retains upstream Bluetooth LE mesh discovery, packet framing, multi-hop routing, Noise private-message sessions, foreground connectivity service, Wi-Fi Aware support and Nostr transport. Product behavior is layered above those components instead of replacing them.\n\n## Product\n\n- 18+ local profiles\n- nearby-first discovery\n- local/on-device identity and profile state\n- private direct messaging over upstream encrypted sessions\n- no phone-number requirement\n- no central account requirement\n- offline BLE operation retained\n- Nostr fallback retained\n\n## Build\n\n```bash\n./gradlew test\n./gradlew assembleDebug\n```\n\nGitHub Actions publishes the debug build as `bitnow-debug-apk`.\n\n## Upstream and licensing\n\nBased on `permissionlesstech/bitchat-android`. The upstream license is retained unchanged. See `UPSTREAM.md` and `UPSTREAM_COMMIT`.\n''')
 
           base = Path('app/src/main/java/com/bitchat/android/bitnow')
           base.mkdir(parents=True, exist_ok=True)
@@ -63,63 +65,25 @@ jobs:
           PY
           cp /tmp/upstream-sha UPSTREAM_COMMIT
 
-      - name: Replace upstream build workflow with BitNow CI
-        run: |
-          rm -rf .github/workflows
-          mkdir -p .github/workflows
-          cat > .github/workflows/bitnow-android.yml <<'YAML'
-          name: BitNow Android
-
-          on:
-            push:
-              branches: [ bitnow/upstream-full-rebrand ]
-            pull_request:
-              branches: [ main ]
-            workflow_dispatch:
-
-          permissions:
-            contents: read
-
-          jobs:
-            build:
-              runs-on: ubuntu-latest
-              steps:
-                - uses: actions/checkout@v4
-                - uses: actions/setup-java@v4
-                  with:
-                    distribution: temurin
-                    java-version: '21'
-                - name: Unit tests
-                  run: ./gradlew test --no-daemon
-                - name: Build debug APK
-                  run: ./gradlew assembleDebug --no-daemon
-                - name: Upload BitNow APK
-                  uses: actions/upload-artifact@v4
-                  with:
-                    name: bitnow-debug-apk
-                    path: app/build/outputs/apk/debug/*.apk
-                    if-no-files-found: error
-          YAML
-
-      - name: Commit complete BitNow base
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "feat(bitnow): transplant upstream Android client and apply BitNow product layer"
-          git push origin HEAD:${TARGET_BRANCH}
-
       - name: Set up Java 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
 
-      - name: Test
+      - name: Unit tests
         run: ./gradlew test --no-daemon
 
-      - name: Build APK
+      - name: Build debug APK
         run: ./gradlew assembleDebug --no-daemon
+
+      - name: Commit complete BitNow base
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A -- ':!.github/workflows'
+          git commit -m "feat(bitnow): transplant upstream Android client and apply BitNow product layer"
+          git push origin HEAD:${TARGET_BRANCH}
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
