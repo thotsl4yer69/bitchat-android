@@ -1,0 +1,127 @@
+name: Bootstrap BitNow from upstream
+
+on:
+  push:
+    branches:
+      - bitnow/upstream-full-rebrand
+    paths:
+      - .github/workflows/bootstrap-bitnow.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  UPSTREAM_REPO: https://github.com/permissionlesstech/bitchat-android.git
+
+jobs:
+  transplant:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout BitNow branch
+        uses: actions/checkout@v4
+        with:
+          ref: bitnow/upstream-full-rebrand
+          fetch-depth: 0
+
+      - name: Fetch current upstream
+        run: |
+          git clone --depth 1 "$UPSTREAM_REPO" /tmp/bitchat-upstream
+          git -C /tmp/bitchat-upstream rev-parse HEAD > /tmp/upstream-sha
+
+      - name: Replace experimental client with upstream tree
+        run: |
+          rsync -a --delete \
+            --exclude '.git/' \
+            /tmp/bitchat-upstream/ ./
+
+      - name: Apply BitNow product layer
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          gradle = Path('app/build.gradle.kts')
+          text = gradle.read_text()
+          text = text.replace('applicationId = "com.bitchat.droid"', 'applicationId = "com.mazlabz.bitnow"')
+          gradle.write_text(text)
+
+          strings = Path('app/src/main/res/values/strings.xml')
+          text = strings.read_text()
+          text = text.replace('<string name="app_name">bitchat</string>', '<string name="app_name">BitNow</string>')
+          text = text.replace('BitChat', 'BitNow').replace('bitchat', 'BitNow')
+          text = text.replace('bitchatters nearby!', 'people nearby now!')
+          text = text.replace('The sidegroup chat', 'Meet nearby. Message privately. No central account.')
+          strings.write_text(text)
+
+          readme = Path('README.md')
+          readme.write_text('''# BitNow Android\n\nBitNow is a proximity-first, decentralized Android client built on the upstream BitChat Android transport.\n\n## Foundation\n\nThis branch intentionally keeps the upstream Bluetooth LE mesh, Noise private-message sessions, packet framing, peer discovery, routing, foreground service, Wi-Fi Aware transport, Nostr transport and cryptographic implementation intact. The product layer is rebranded and extended as BitNow rather than reimplementing those protocol components.\n\nUpstream: `permissionlesstech/bitchat-android`\n\n## BitNow product direction\n\n- nearby-first discovery\n- local profile stored on-device\n- explicit 18+ product positioning\n- encrypted private messaging over the proven upstream transport\n- no phone-number or centralized account requirement\n- offline BLE mesh behavior retained\n- Nostr fallback retained where supported by upstream\n\n## Build\n\n```bash\n./gradlew test\n./gradlew assembleDebug\n```\n\nDebug APKs are published by GitHub Actions as `bitnow-debug-apk`.\n\n## Licensing / provenance\n\nThis repository retains the upstream license and source history/provenance. BitNow-specific modifications are clearly identified in Git history.\n''')
+
+          profile = Path('app/src/main/java/com/bitchat/android/bitnow/BitNowProfile.kt')
+          profile.parent.mkdir(parents=True, exist_ok=True)
+          profile.write_text('''package com.bitchat.android.bitnow\n\n/** Local-only BitNow profile metadata. Transport identity remains owned by upstream mesh code. */\ndata class BitNowProfile(\n    val displayName: String,\n    val age: Int,\n    val bio: String = "",\n    val lookingFor: String = "Meet now",\n    val visible: Boolean = true\n) {\n    init { require(age >= 18) { "BitNow profiles must be 18+" } }\n}\n''')
+
+          codec = Path('app/src/main/java/com/bitchat/android/bitnow/BitNowProfileCodec.kt')
+          codec.write_text('''package com.bitchat.android.bitnow\n\nimport org.json.JSONObject\n\nobject BitNowProfileCodec {\n    private const val TYPE = "bitnow.profile.v1"\n\n    fun encode(profile: BitNowProfile): String = JSONObject()\n        .put("type", TYPE)\n        .put("displayName", profile.displayName)\n        .put("age", profile.age)\n        .put("bio", profile.bio)\n        .put("lookingFor", profile.lookingFor)\n        .put("visible", profile.visible)\n        .toString()\n\n    fun decode(payload: String): BitNowProfile? = runCatching {\n        val json = JSONObject(payload)\n        if (json.optString("type") != TYPE) return null\n        BitNowProfile(\n            displayName = json.getString("displayName"),\n            age = json.getInt("age"),\n            bio = json.optString("bio"),\n            lookingFor = json.optString("lookingFor", "Meet now"),\n            visible = json.optBoolean("visible", true)\n        )\n    }.getOrNull()\n}\n''')
+
+          provenance = Path('UPSTREAM.md')
+          provenance.write_text(f'''# Upstream provenance\n\nBitNow Android is based on `permissionlesstech/bitchat-android`.\n\nThe bootstrap workflow records the exact upstream commit in `UPSTREAM_COMMIT`. The upstream transport and cryptographic code is deliberately kept structurally intact to preserve compatibility while BitNow-specific features live under `com.bitchat.android.bitnow` and in explicitly branded resources.\n''')
+          PY
+          cp /tmp/upstream-sha UPSTREAM_COMMIT
+
+      - name: Install Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Run unit tests
+        run: ./gradlew test --no-daemon
+
+      - name: Build debug APK
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Install permanent BitNow CI
+        run: |
+          mkdir -p .github/workflows
+          cat > .github/workflows/bitnow-android.yml <<'YAML'
+          name: BitNow Android
+
+          on:
+            push:
+              branches:
+                - bitnow/upstream-full-rebrand
+            pull_request:
+            workflow_dispatch:
+
+          permissions:
+            contents: read
+
+          jobs:
+            test-and-build:
+              runs-on: ubuntu-latest
+              steps:
+                - uses: actions/checkout@v4
+                - uses: actions/setup-java@v4
+                  with:
+                    distribution: temurin
+                    java-version: '21'
+                - name: Unit tests
+                  run: ./gradlew test --no-daemon
+                - name: Build debug APK
+                  run: ./gradlew assembleDebug --no-daemon
+                - name: Upload BitNow APK
+                  uses: actions/upload-artifact@v4
+                  with:
+                    name: bitnow-debug-apk
+                    path: app/build/outputs/apk/debug/*.apk
+                    if-no-files-found: error
+          YAML
+
+      - name: Commit complete transplant
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat(bitnow): replace experimental Android client with upstream-compatible BitNow base"
+          git push origin HEAD:bitnow/upstream-full-rebrand
