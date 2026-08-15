@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">bitchat</string>
+    <string name="app_name">BitNow</string>
     <string name="mesh_channel_name">Mesh network</string>
     <string name="mesh_channel_description">Keeps the Bluetooth mesh running in the background</string>
     <string name="mesh_notification_no_peers">Mesh running</string>

@@ -57,7 +57,7 @@
   <string name="verify_success_system_message">zweryfikowano %1$s</string>
 
     <!-- Newly translated strings -->
-    <string name="app_name">bitchat</string>
+    <string name="app_name">BitNow</string>
     <string name="permission_bluetooth_rationale">Uprawnienie Bluetooth jest wymagane do komunikacji peer-to-peer bez internetu.</string>
     <string name="permission_location_rationale">Uprawnienie lokalizacji jest wymagane do wykrywania pobliskich urządzeń przez Bluetooth.</string>
     <string name="permission_notification_rationale">Uprawnienie powiadomień jest wymagane, aby informować Cię o nowych wiadomościach.</string>

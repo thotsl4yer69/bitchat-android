@@ -41,7 +41,7 @@
   <string name="verify_success_body">நீங்கள் %1$s ஐ சரிபார்த்துவிட்டீர்கள்</string>
   <string name="verify_success_system_message">%1$s சரிபார்க்கப்பட்டது</string>
 
-  <string name="app_name">bitchat</string>
+  <string name="app_name">BitNow</string>
   <string name="permission_bluetooth_rationale">இணையம் இல்லாமல் பியர்-டு-பியர் செய்திகள் அனுப்ப Bluetooth அனுமதி தேவை.</string>
   <string name="permission_location_rationale">Bluetooth வழியாக அருகிலுள்ள சாதனங்களைக் கண்டறிய இருப்பிட அனுமதி தேவை.</string>
   <string name="permission_notification_rationale">புதிய செய்திகளை உங்களுக்குத் தெரிவிக்க அறிவிப்பு அனுமதி தேவை.</string>

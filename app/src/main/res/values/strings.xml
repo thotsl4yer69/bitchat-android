@@ -225,8 +225,8 @@
   <string name="cancel_lower">Cancel</string>
 
   <!-- APK Sharing -->
-  <string name="share_BitNow_title">Share BitNow</string>
-  <string name="share_BitNow_subtitle">Share installation file for offline distribution</string>
+  <string name="share_bitchat_title">Share BitNow</string>
+  <string name="share_bitchat_subtitle">Share installation file for offline distribution</string>
   <string name="share_apk_title">Share BitNow App</string>
   <string name="share_apk_explanation">This will share the BitNow installation file(s) so others can install the app without internet access. Perfect for mesh network expansion!</string>
   <string name="share_apk_receiver_instructions">The receiver will need to:\n• Enable \"Install from unknown sources\" in Android settings\n• Uninstall BitNow first if already installed (signatures differ)</string>
@@ -294,7 +294,7 @@
   <string name="prepare_apk_error_untrusted_key">The APK from %1$s is not signed by a trusted BitNow release key.</string>
   <string name="prepare_apk_error_not_universal">%1$s returned an architecture-specific APK, not the required universal APK.</string>
   <string name="prepare_apk_error_apk_unreadable">The downloaded APK could not be read.</string>
-  <string name="prepare_apk_error_not_BitNow">The downloaded file is not a BitNow APK.</string>
+  <string name="prepare_apk_error_not_bitchat">The downloaded file is not a BitNow APK.</string>
   <string name="prepare_apk_error_no_version">The downloaded APK has no version information.</string>
   <string name="prepare_apk_error_source_failed">%1$s download failed.</string>
   <string name="prepare_apk_error_all_sources">All configured APK sources failed.</string>
@@ -316,8 +316,8 @@
   <string name="hotspot_disconnect_confirm">Disconnect and start</string>
 
   <!-- APK Installation -->
-  <string name="install_BitNow_title">Install Received APK</string>
-  <string name="install_BitNow_subtitle">Install BitNow from received files</string>
+  <string name="install_bitchat_title">Install Received APK</string>
+  <string name="install_bitchat_subtitle">Install BitNow from received files</string>
   <string name="install_apk_dialog_title">Install BitNow Update</string>
   <string name="install_apk_dialog_message">Install BitNow from the received APK file(s)? This allows offline app distribution in mesh networks.</string>
   <string name="install_apk_permission_title">Permission Required</string>
@@ -345,7 +345,7 @@
   <string name="cd_open_map">Open map</string>
   <string name="cd_remove_bookmark">Remove bookmark</string>
   <string name="cd_teleport">Teleport</string>
-  <string name="notification_action_quit_BitNow">Quit BitNow</string>
+  <string name="notification_action_quit_bitchat">Quit BitNow</string>
   <string name="about_background_title">Run in Background</string>
   <string name="about_background_desc">Keep mesh active when app is closed (foreground service)</string>
   <string name="cd_leave_channel">Leave channel</string>

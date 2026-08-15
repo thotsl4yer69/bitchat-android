@@ -42,7 +42,7 @@
   <string name="verify_success_system_message">підтверджено %1$s</string>
 
     <!-- Newly translated strings -->
-    <string name="app_name">bitchat</string>
+    <string name="app_name">BitNow</string>
     <string name="permission_bluetooth_rationale">Дозвіл на використання Bluetooth потрібен для обміну повідомленнями напряму, без інтернету.</string>
     <string name="permission_location_rationale">Дозвіл на геолокацію потрібен для виявлення пристроїв поруч через Bluetooth.</string>
     <string name="permission_notification_rationale">Дозвіл на сповіщення потрібен, щоб повідомляти вас про нові повідомлення.</string>

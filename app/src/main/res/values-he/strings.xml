@@ -55,7 +55,7 @@
   <string name="verify_success_body">אימתת את %1$s</string>
   <string name="verify_success_system_message">אימת את %1$s</string>
 
-  <string name="app_name">bitchat</string>
+  <string name="app_name">BitNow</string>
   <string name="permission_bluetooth_rationale">נדרשת הרשאת Bluetooth להעברת הודעות בין עמיתים ללא אינטרנט.</string>
   <string name="permission_location_rationale">נדרשת הרשאת מיקום כדי לגלות מכשירים קרובים באמצעות Bluetooth.</string>
   <string name="permission_notification_rationale">נדרשת הרשאת התראות כדי להתריע לך על הודעות חדשות.</string>

@@ -55,7 +55,7 @@
   <string name="verify_success_body">你已驗證 %1$s</string>
   <string name="verify_success_system_message">已驗證 %1$s</string>
 
-  <string name="app_name">bitchat</string>
+  <string name="app_name">BitNow</string>
   <string name="permission_bluetooth_rationale">點對點傳訊需要藍牙權限，無需網際網路。</string>
   <string name="permission_location_rationale">需要位置權限才能透過藍牙探索附近的裝置。</string>
   <string name="permission_notification_rationale">需要通知權限才能提醒你有新訊息。</string>

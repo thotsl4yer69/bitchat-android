@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Machine-translated (Claude) — pending native-speaker review -->
-    <string name="app_name">bitchat</string>
+    <string name="app_name">BitNow</string>
     <string name="permission_bluetooth_rationale">Kebenaran Bluetooth diperlukan untuk pemesejan rakan-ke-rakan tanpa internet.</string>
     <string name="permission_location_rationale">Kebenaran lokasi diperlukan untuk mengesan peranti berdekatan melalui Bluetooth.</string>
     <string name="permission_notification_rationale">Kebenaran pemberitahuan diperlukan untuk memaklumkan anda tentang mesej baharu.</string>

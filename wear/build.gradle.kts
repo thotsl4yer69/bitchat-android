@@ -12,7 +12,7 @@ android {
     buildToolsVersion = libs.versions.buildTools.get()
 
     defaultConfig {
-        applicationId = "com.bitchat.droid"
+        applicationId = "com.mazlabz.bitnow"
         minSdk = 33 // Wear OS 4 (Pixel Watch 1+): the S+ Bluetooth permissions the app
         // declares only exist from API 31, and API 30 would additionally require location
         // for BLE scan results, which the app deliberately refuses.
@@ -89,6 +89,11 @@ val sharedSourceIncludes = listOf(
     "com/bitchat/android/model/**",
     "com/bitchat/android/sync/**",
     "com/bitchat/android/favorites/**",
+    "com/bitchat/android/bitnow/BitNowProfile.kt",
+    "com/bitchat/android/bitnow/BitNowProfileCodec.kt",
+    "com/bitchat/android/bitnow/BitNowControlMessage.kt",
+    "com/bitchat/android/bitnow/BitNowRegistry.kt",
+    "com/bitchat/android/bitnow/BitNowRelationshipStore.kt",
     "com/bitchat/android/services/AppStateStore.kt",
     "com/bitchat/android/services/ContactDirectory.kt",
     "com/bitchat/android/services/ContactIdentityResolver.kt",
