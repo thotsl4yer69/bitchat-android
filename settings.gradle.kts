@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "BitChat"
+rootProject.name = "BitNow"
 include(":app")

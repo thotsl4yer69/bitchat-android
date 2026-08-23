@@ -1,4 +1,4 @@
-name: Build BitChat APK
+name: Build BitNow APK
 
 on:
   push:
@@ -23,18 +23,10 @@ jobs:
     - name: Setup Android SDK
       uses: android-actions/setup-android@v2
       
-    - name: Cache Gradle packages
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-
-          
     - name: Setup Gradle
-      uses: gradle/gradle-build-action@v2
+      uses: gradle/actions/setup-gradle@v4
+      with:
+        gradle-version: '8.2'
       
     - name: Build Debug APK
       run: gradle assembleDebug
@@ -42,5 +34,5 @@ jobs:
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: bitchat-debug-apk
+        name: bitnow-debug-apk
         path: app/build/outputs/apk/debug/app-debug.apk
