@@ -145,12 +145,13 @@ data class IdentityAnnouncement(
         fun forLocalPeer(
             nickname: String,
             noisePublicKey: ByteArray,
-            signingPublicKey: ByteArray
+            signingPublicKey: ByteArray,
+            capabilities: PeerCapabilities = PeerCapabilities.LOCAL_SUPPORTED
         ): IdentityAnnouncement = IdentityAnnouncement(
             nickname = nickname,
             noisePublicKey = noisePublicKey,
             signingPublicKey = signingPublicKey,
-            capabilities = PeerCapabilities.LOCAL_SUPPORTED
+            capabilities = capabilities
         )
     }
     
