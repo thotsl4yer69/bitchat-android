@@ -265,7 +265,7 @@ fun BitNowProfileSetupScreen(
             text = {
                 Text(
                     "This hides you immediately and removes your BitNow profile, " +
-                        "signals, filters, blocks and local reports from this device."
+                        "active signals and discovery filters from this device. Safety blocks and reports are kept."
                 )
             },
             confirmButton = {
