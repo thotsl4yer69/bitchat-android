@@ -32,8 +32,21 @@ data class PeerCapabilities(val rawValue: Long) : Parcelable {
         /** Noise-encrypted private BitchatFilePacket using payload type 0x20. */
         val PRIVATE_MEDIA = PeerCapabilities(1L shl 8)
 
-        /** Capabilities implemented by this Android build. */
+        /**
+         * BitNow dating availability. This is deliberately an availability bit,
+         * not a permanent "has BitNow installed" bit. It is advertised only
+         * while the user has an active, explicit availability window.
+         */
+        val BITNOW_AVAILABLE = PeerCapabilities(1L shl 11)
+
+        /** Baseline capabilities implemented regardless of BitNow visibility. */
         val LOCAL_SUPPORTED = PRIVATE_MEDIA
+
+        fun localSupported(bitNowAvailable: Boolean): PeerCapabilities =
+            PeerCapabilities(
+                LOCAL_SUPPORTED.rawValue or
+                    if (bitNowAvailable) BITNOW_AVAILABLE.rawValue else 0L
+            )
 
         /**
          * Decode the low 64 bits and ignore any future extension bytes, which
