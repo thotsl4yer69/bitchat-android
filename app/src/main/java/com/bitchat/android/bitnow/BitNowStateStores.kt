@@ -159,7 +159,7 @@ object BitNowSafetyStore {
             .put("reason", reason.take(280))
             .put("reportedAtMs", nowMs)
             .toString()
-        prefs.edit().putStringSet(KEY_REPORTS, reports.takeLast(100).toSet()).apply()
+        prefs.edit().putStringSet(KEY_REPORTS, reports.toList().takeLast(100).toSet()).apply()
         block(context, peerId)
     }
 
