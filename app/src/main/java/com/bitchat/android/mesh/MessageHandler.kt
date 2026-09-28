@@ -100,13 +100,23 @@ class MessageHandler(private val myPeerID: String, private val appContext: andro
                         val pmContent = privateMessage.content
                         when (val bitNow = BitNowControlMessage.parse(pmContent)) {
                             is BitNowControlMessage.Profile -> {
-                                if (bitNow.profile.visible) BitNowRegistry.update(peerID, bitNow.profile)
-                                else BitNowRegistry.remove(peerID)
+                                if (!com.bitchat.android.bitnow.BitNowSafetyStore.isBlocked(peerID)) {
+                                    BitNowRegistry.update(peerID, bitNow.profile)
+                                }
                                 sendDeliveryAck(privateMessage.messageID, peerID)
                                 return true
                             }
-                            is BitNowControlMessage.Interest -> {
-                                BitNowRelationshipStore.setTheirs(peerID, bitNow.interested)
+                            is BitNowControlMessage.Signal -> {
+                                if (!com.bitchat.android.bitnow.BitNowSafetyStore.isBlocked(peerID)) {
+                                    bitNow.profile?.let { BitNowRegistry.update(peerID, it) }
+                                    BitNowRelationshipStore.setTheirs(peerID, bitNow.intent)
+                                }
+                                sendDeliveryAck(privateMessage.messageID, peerID)
+                                return true
+                            }
+                            BitNowControlMessage.ProfileRequest -> {
+                                // Requests are protocol-valid but Android publishes its profile
+                                // proactively while its timed availability window is active.
                                 sendDeliveryAck(privateMessage.messageID, peerID)
                                 return true
                             }
