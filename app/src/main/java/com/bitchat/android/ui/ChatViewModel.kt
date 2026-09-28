@@ -46,6 +46,10 @@ import com.bitchat.android.bitnow.BitNowProfile
 import com.bitchat.android.bitnow.BitNowProfileStore
 import com.bitchat.android.bitnow.BitNowRegistry
 import com.bitchat.android.bitnow.BitNowRelationshipStore
+import com.bitchat.android.bitnow.BitNowAvailabilityStore
+import com.bitchat.android.bitnow.BitNowAvailabilityWindow
+import com.bitchat.android.bitnow.BitNowDiscoveryFilterStore
+import com.bitchat.android.bitnow.BitNowSafetyStore
 import com.bitchat.android.services.MessageRouter
 
 private data class ConversationLiveIdentityState(
@@ -396,6 +400,9 @@ class ChatViewModel(
     val bitNowProfiles = BitNowRegistry.profiles
     val bitNowMyInterests = BitNowRelationshipStore.myInterests
     val bitNowTheirInterests = BitNowRelationshipStore.theirInterests
+    val bitNowAvailabilityUntil = BitNowAvailabilityStore.availableUntilMs
+    val bitNowDiscoveryFilter = BitNowDiscoveryFilterStore.filter
+    val bitNowBlockedPeers = BitNowSafetyStore.blocked
     val showAppInfo: StateFlow<Boolean> = state.showAppInfo
     val showMeshPeerList: StateFlow<Boolean> = state.showMeshPeerList
     val privateChatSheetPeer: StateFlow<String?> = state.privateChatSheetPeer
@@ -427,6 +434,15 @@ class ChatViewModel(
         loadAndInitialize()
         ContactDirectory.initialize(getApplication()) { mesh }
         BitNowRelationshipStore.initialize(getApplication())
+        BitNowAvailabilityStore.initialize(getApplication())
+        BitNowDiscoveryFilterStore.initialize(getApplication())
+        BitNowSafetyStore.initialize(getApplication())
+        BitNowAvailabilityStore.expireIfNeeded(getApplication())
+        BitNowProfileStore.load(getApplication())?.let { stored ->
+            if (stored.visibleNearby && !BitNowAvailabilityStore.isAvailable(stored)) {
+                BitNowProfileStore.save(getApplication(), stored.copy(visibleNearby = false))
+            }
+        }
         viewModelScope.launch {
             var sharedWith = emptySet<String>()
             state.connectedPeers.collect { peers ->
@@ -434,14 +450,48 @@ class ChatViewModel(
                 BitNowRegistry.retain(active)
                 sharedWith = sharedWith intersect active
                 val localProfile = BitNowProfileStore.load(getApplication())
-                if (localProfile != null && localProfile.visible) {
+                if (BitNowAvailabilityStore.isAvailable(localProfile)) {
                     (active - sharedWith).forEach { peerID ->
                         runCatching {
-                            MessageRouter.getInstance(getApplication(), mesh)
-                                .sendBitNowProfile(peerID, localProfile)
+                            val router = MessageRouter.getInstance(getApplication(), mesh)
+                            router.sendBitNowProfile(peerID, localProfile!!)
+                            router.sendBitNowProfileRequest(peerID)
                         }
                     }
                     sharedWith = sharedWith + active
+                } else {
+                    sharedWith = emptySet()
+                }
+            }
+        }
+        viewModelScope.launch {
+            while (true) {
+                kotlinx.coroutines.delay(60_000L)
+                val expired = BitNowAvailabilityStore.expireIfNeeded(getApplication())
+                if (expired) {
+                    BitNowProfileStore.load(getApplication())?.let { profile ->
+                        if (profile.visibleNearby) {
+                            BitNowProfileStore.save(
+                                getApplication(),
+                                profile.copy(visibleNearby = false)
+                            )
+                        }
+                    }
+                    BitNowRelationshipStore.clearAll(getApplication())
+                }
+                BitNowRegistry.prune()
+                BitNowRelationshipStore.pruneExpired(getApplication())
+                val localProfile = BitNowProfileStore.load(getApplication())
+                if (BitNowAvailabilityStore.isAvailable(localProfile)) {
+                    state.connectedPeers.value
+                        .filter { it != mesh.myPeerID }
+                        .forEach { peerID ->
+                            runCatching {
+                                val router = MessageRouter.getInstance(getApplication(), mesh)
+                                router.sendBitNowProfile(peerID, localProfile!!)
+                                router.sendBitNowProfileRequest(peerID)
+                            }
+                        }
                 }
             }
         }
@@ -679,27 +729,84 @@ class ChatViewModel(
     // MARK: - Nickname Management
     
     fun saveBitNowProfile(profile: BitNowProfile) {
-        BitNowProfileStore.save(getApplication(), profile)
-        connectedPeers.value
-            .filter { it != mesh.myPeerID }
-            .forEach { peerID ->
-                runCatching {
-                    MessageRouter.getInstance(getApplication(), mesh)
-                        .sendBitNowProfile(peerID, profile)
-                }
-            }
+        val safe = if (profile.isShareable) profile else profile.copy(visibleNearby = false)
+        BitNowProfileStore.save(getApplication(), safe)
+        if (!safe.visibleNearby) {
+            BitNowAvailabilityStore.stop(getApplication())
+            BitNowRelationshipStore.clearAll(getApplication())
+            return
+        }
+        if (BitNowAvailabilityStore.isAvailable(safe)) {
+            publishBitNowProfile(safe)
+        }
+    }
+
+    fun startBitNowAvailability(window: BitNowAvailabilityWindow): Boolean {
+        val profile = BitNowProfileStore.load(getApplication()) ?: return false
+        if (!profile.isShareable) return false
+        val live = profile.copy(visibleNearby = true)
+        BitNowProfileStore.save(getApplication(), live)
+        BitNowAvailabilityStore.start(getApplication(), window)
+        publishBitNowProfile(live)
+        return true
+    }
+
+    fun stopBitNowAvailability() {
+        BitNowAvailabilityStore.stop(getApplication())
+        BitNowProfileStore.load(getApplication())?.let { profile ->
+            BitNowProfileStore.save(getApplication(), profile.copy(visibleNearby = false))
+        }
+        BitNowRelationshipStore.clearAll(getApplication())
     }
 
     fun setBitNowInterest(peerID: String, interested: Boolean) {
-        BitNowRelationshipStore.setMine(getApplication(), peerID, interested)
+        val profile = BitNowProfileStore.load(getApplication()) ?: return
+        if (!interested) {
+            BitNowRelationshipStore.setMine(
+                getApplication(),
+                peerID,
+                profile.primaryIntent,
+                false
+            )
+            return
+        }
+        if (!BitNowAvailabilityStore.isAvailable(profile) || BitNowSafetyStore.isBlocked(peerID)) {
+            return
+        }
+        BitNowRelationshipStore.setMine(
+            getApplication(),
+            peerID,
+            profile.primaryIntent,
+            true
+        )
         runCatching {
             MessageRouter.getInstance(getApplication(), mesh)
-                .sendBitNowInterest(peerID, interested)
+                .sendBitNowSignal(peerID, profile.primaryIntent, profile)
         }
+    }
+
+    fun blockBitNowPeer(peerID: String) {
+        BitNowSafetyStore.block(getApplication(), peerID)
+    }
+
+    fun reportBitNowPeer(peerID: String, reason: String) {
+        BitNowSafetyStore.reportAndBlock(getApplication(), peerID, reason)
     }
 
     fun openBitNowChat(peerID: String) {
         showPrivateChatSheet(peerID)
+    }
+
+    private fun publishBitNowProfile(profile: BitNowProfile) {
+        connectedPeers.value
+            .filter { it != mesh.myPeerID && !BitNowSafetyStore.isBlocked(it) }
+            .forEach { peerID ->
+                runCatching {
+                    val router = MessageRouter.getInstance(getApplication(), mesh)
+                    router.sendBitNowProfile(peerID, profile)
+                    router.sendBitNowProfileRequest(peerID)
+                }
+            }
     }
 
     fun setNickname(newNickname: String) {
