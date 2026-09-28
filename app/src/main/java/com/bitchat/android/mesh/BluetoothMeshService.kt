@@ -65,7 +65,7 @@ class BluetoothMeshService(private val context: Context) : TransportBridgeServic
             store = authenticatedPeerStateStore,
             localStateProvider = {
                 AuthenticatedPeerState(
-                    PeerCapabilities.LOCAL_SUPPORTED,
+                    localPeerCapabilities(),
                     requireNotNull(encryptionService.getSigningPublicKey())
                 )
             },
@@ -74,6 +74,16 @@ class BluetoothMeshService(private val context: Context) : TransportBridgeServic
             onResolution = { peerID -> delegate?.didResolvePrivateMediaPolicy(peerID) }
         )
     }
+    private fun localPeerCapabilities(): PeerCapabilities {
+        val profile = com.bitchat.android.bitnow.BitNowProfileStore.load(context)
+        val bitNowAvailable =
+            com.bitchat.android.bitnow.BitNowAvailabilityStore.isPersistedAvailable(
+                context,
+                profile
+            )
+        return PeerCapabilities.localSupported(bitNowAvailable)
+    }
+
     private val privateMediaSecurity by lazy { PrivateMediaSecurityController(
         authenticatedSessionProvider = encryptionService::getAuthenticatedSession,
         peerStateStatusProvider = authenticatedPeerState::status,
@@ -1251,7 +1261,12 @@ class BluetoothMeshService(private val context: Context) : TransportBridgeServic
             }
             
             // Create iOS-compatible IdentityAnnouncement with TLV encoding
-            val announcement = IdentityAnnouncement.forLocalPeer(nickname, staticKey, signingKey)
+            val announcement = IdentityAnnouncement.forLocalPeer(
+                nickname,
+                staticKey,
+                signingKey,
+                localPeerCapabilities()
+            )
             var tlvPayload = announcement.encode()
             if (tlvPayload == null) {
                 Log.e(TAG, "Failed to encode announcement as TLV")
@@ -1313,7 +1328,12 @@ class BluetoothMeshService(private val context: Context) : TransportBridgeServic
         }
         
         // Create iOS-compatible IdentityAnnouncement with TLV encoding
-        val announcement = IdentityAnnouncement.forLocalPeer(nickname, staticKey, signingKey)
+        val announcement = IdentityAnnouncement.forLocalPeer(
+                nickname,
+                staticKey,
+                signingKey,
+                localPeerCapabilities()
+            )
         var tlvPayload = announcement.encode()
         if (tlvPayload == null) {
             Log.e(TAG, "Failed to encode peer announcement as TLV")
