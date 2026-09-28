@@ -21,6 +21,22 @@ require(
     "BITCHAT_GITHUB_RELEASE_CERT_SHA256 must be a SHA-256 certificate fingerprint"
 }
 
+val bitNowReportEmail = providers
+    .environmentVariable("BITNOW_REPORT_EMAIL")
+    .orElse(providers.gradleProperty("BITNOW_REPORT_EMAIL"))
+    .orElse("")
+    .get()
+    .trim()
+require(
+    bitNowReportEmail.isEmpty() ||
+        (bitNowReportEmail.contains("@") && !bitNowReportEmail.contains("$("))
+) {
+    "BITNOW_REPORT_EMAIL must be empty or a valid operator-controlled email address"
+}
+val escapedBitNowReportEmail = bitNowReportEmail
+    .replace("\\", "\\\\")
+    .replace("\"", "\\\"")
+
 android {
     namespace = "com.bitchat.android"
     compileSdk = libs.versions.compileSdk.get().toInt()
@@ -36,6 +52,11 @@ android {
             "String",
             "GITHUB_RELEASE_CERT_SHA256",
             "\"$normalizedGithubReleaseCertSha256\""
+        )
+        buildConfigField(
+            "String",
+            "BITNOW_REPORT_EMAIL",
+            "\"$escapedBitNowReportEmail\""
         )
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
