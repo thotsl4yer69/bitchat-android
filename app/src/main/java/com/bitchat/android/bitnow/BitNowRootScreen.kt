@@ -83,6 +83,11 @@ fun BitNowRootScreen(viewModel: ChatViewModel) {
                     onSave = {
                         viewModel.saveBitNowProfile(it)
                         localProfile = BitNowProfileStore.load(context)
+                    },
+                    onReset = {
+                        viewModel.resetBitNowData()
+                        localProfile = null
+                        tab = BitNowTab.ME
                     }
                 )
             }
@@ -93,7 +98,8 @@ fun BitNowRootScreen(viewModel: ChatViewModel) {
 @Composable
 fun BitNowProfileSetupScreen(
     initial: BitNowProfile? = null,
-    onSave: (BitNowProfile) -> Unit
+    onSave: (BitNowProfile) -> Unit,
+    onReset: (() -> Unit)? = null
 ) {
     var displayName by remember(initial) { mutableStateOf(initial?.displayName.orEmpty()) }
     var ageText by remember(initial) { mutableStateOf(initial?.age?.toString().orEmpty()) }
@@ -105,6 +111,7 @@ fun BitNowProfileSetupScreen(
     var interestedIn by remember(initial) { mutableStateOf(initial?.interestedIn ?: emptySet()) }
     var showAge by remember(initial) { mutableStateOf(initial?.showAge ?: true) }
     var adultConfirmed by remember(initial) { mutableStateOf(initial != null) }
+    var confirmReset by remember { mutableStateOf(false) }
 
     val age = ageText.toIntOrNull()
     val valid = adultConfirmed &&
@@ -238,6 +245,41 @@ fun BitNowProfileSetupScreen(
                 Text(if (initial == null) "Save profile — stay hidden" else "Save changes")
             }
         }
+        if (onReset != null) {
+            item {
+                HorizontalDivider()
+                TextButton(
+                    onClick = { confirmReset = true },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Reset all BitNow data", color = MaterialTheme.colorScheme.error)
+                }
+            }
+        }
+    }
+
+    if (confirmReset && onReset != null) {
+        AlertDialog(
+            onDismissRequest = { confirmReset = false },
+            title = { Text("Reset BitNow?") },
+            text = {
+                Text(
+                    "This hides you immediately and removes your BitNow profile, " +
+                        "signals, filters, blocks and local reports from this device."
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmReset = false
+                    onReset()
+                }) {
+                    Text("Reset", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmReset = false }) { Text("Cancel") }
+            }
+        )
     }
 }
 
@@ -440,12 +482,13 @@ private fun BitNowMatchesScreen(
 @Composable
 private fun BitNowMeScreen(
     profile: BitNowProfile?,
-    onSave: (BitNowProfile) -> Unit
+    onSave: (BitNowProfile) -> Unit,
+    onReset: () -> Unit
 ) {
     if (profile == null) {
         BitNowProfileSetupScreen(onSave = onSave)
     } else {
-        BitNowProfileSetupScreen(initial = profile, onSave = onSave)
+        BitNowProfileSetupScreen(initial = profile, onSave = onSave, onReset = onReset)
     }
 }
 
