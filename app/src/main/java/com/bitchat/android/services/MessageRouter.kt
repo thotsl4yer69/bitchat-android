@@ -204,9 +204,21 @@ class MessageRouter private constructor(
             messageID = java.util.UUID.randomUUID().toString().uppercase()
         )
 
-    fun sendBitNowInterest(toPeerID: String, interested: Boolean): RouteResult =
+    fun sendBitNowSignal(
+        toPeerID: String,
+        intent: com.bitchat.android.bitnow.BitNowIntent,
+        profile: BitNowProfile
+    ): RouteResult =
         sendPrivate(
-            content = BitNowControlMessage.encodeInterest(interested),
+            content = BitNowControlMessage.encodeSignal(intent, profile),
+            toPeerID = toPeerID,
+            recipientNickname = "BitNow",
+            messageID = java.util.UUID.randomUUID().toString().uppercase()
+        )
+
+    fun sendBitNowProfileRequest(toPeerID: String): RouteResult =
+        sendPrivate(
+            content = BitNowControlMessage.encodeProfileRequest(),
             toPeerID = toPeerID,
             recipientNickname = "BitNow",
             messageID = java.util.UUID.randomUUID().toString().uppercase()
