@@ -790,6 +790,16 @@ class ChatViewModel(
         }
     }
 
+    fun resetBitNowData() {
+        BitNowAvailabilityStore.stop(getApplication())
+        BitNowProfileStore.clear(getApplication())
+        BitNowRelationshipStore.clearAll(getApplication())
+        BitNowDiscoveryFilterStore.reset(getApplication())
+        BitNowSafetyStore.clear(getApplication())
+        BitNowRegistry.clear()
+        mesh.sendBroadcastAnnounce()
+    }
+
     fun blockBitNowPeer(peerID: String) {
         BitNowSafetyStore.block(getApplication(), peerID)
     }
