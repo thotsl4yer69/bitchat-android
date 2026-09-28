@@ -115,8 +115,7 @@ class MessageHandler(private val myPeerID: String, private val appContext: andro
                                 return true
                             }
                             BitNowControlMessage.ProfileRequest -> {
-                                // Requests are protocol-valid but Android publishes its profile
-                                // proactively while its timed availability window is active.
+                                delegate?.onBitNowProfileRequest(peerID)
                                 sendDeliveryAck(privateMessage.messageID, peerID)
                                 return true
                             }
@@ -762,6 +761,7 @@ interface MessageHandlerDelegate {
     fun decryptChannelMessage(encryptedContent: ByteArray, channel: String): String?
 
     // Callbacks
+    fun onBitNowProfileRequest(peerID: String) {}
     fun onMessageReceived(message: BitchatMessage)
     fun onChannelLeave(channel: String, fromPeer: String)
     fun onDeliveryAckReceived(messageID: String, peerID: String)
