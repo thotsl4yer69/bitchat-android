@@ -59,6 +59,31 @@ class IdentityAnnouncementTest {
     }
 
     @Test
+    fun `BitNow capability is opt-in and uses bit 11`() {
+        val hidden = PeerCapabilities.localSupported(bitNowAvailable = false)
+        val live = PeerCapabilities.localSupported(bitNowAvailable = true)
+
+        assertEquals(PeerCapabilities.LOCAL_SUPPORTED, hidden)
+        assertTrue(live.contains(PeerCapabilities.PRIVATE_MEDIA))
+        assertTrue(live.contains(PeerCapabilities.BITNOW_AVAILABLE))
+        assertArrayEquals(byteArrayOf(0x00, 0x09), live.encoded())
+    }
+
+    @Test
+    fun `local announcement can advertise active BitNow availability`() {
+        val capabilities = PeerCapabilities.localSupported(bitNowAvailable = true)
+        val encoded = IdentityAnnouncement.forLocalPeer(
+            nickname,
+            noiseKey,
+            signingKey,
+            capabilities
+        ).encode()!!
+
+        val decoded = IdentityAnnouncement.decode(encoded)!!
+        assertTrue(decoded.capabilities!!.contains(PeerCapabilities.BITNOW_AVAILABLE))
+    }
+
+    @Test
     fun `local announcement send advertises private media`() {
         val encoded = IdentityAnnouncement.forLocalPeer(nickname, noiseKey, signingKey).encode()!!
 
