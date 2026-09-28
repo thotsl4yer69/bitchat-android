@@ -61,6 +61,20 @@ object BitNowAvailabilityStore {
         val until = _availableUntilMs.value ?: return false
         return profile?.visibleNearby == true && profile.isShareable && until > nowMs
     }
+
+    /**
+     * Stateless read for lower transport layers that can be created before the
+     * Compose/ViewModel layer initializes this store's StateFlow.
+     */
+    fun isPersistedAvailable(
+        context: Context,
+        profile: BitNowProfile?,
+        nowMs: Long = System.currentTimeMillis()
+    ): Boolean {
+        val until = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .getLong(KEY_UNTIL, 0L)
+        return profile?.visibleNearby == true && profile.isShareable && until > nowMs
+    }
 }
 
 object BitNowDiscoveryFilterStore {
