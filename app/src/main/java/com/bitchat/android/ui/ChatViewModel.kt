@@ -803,8 +803,11 @@ class ChatViewModel(
         BitNowSafetyStore.block(getApplication(), peerID)
     }
 
-    fun reportBitNowPeer(peerID: String, reason: String) {
-        BitNowSafetyStore.reportAndBlock(getApplication(), peerID, reason)
+    fun recordBitNowReport(peerID: String, reason: String, alsoBlock: Boolean) {
+        BitNowSafetyStore.recordReport(getApplication(), peerID, reason)
+        if (alsoBlock) {
+            BitNowSafetyStore.block(getApplication(), peerID)
+        }
     }
 
     fun openBitNowChat(peerID: String) {
