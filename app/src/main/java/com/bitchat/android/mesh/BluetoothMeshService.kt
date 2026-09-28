@@ -493,6 +493,28 @@ class BluetoothMeshService(private val context: Context) : TransportBridgeServic
                 return delegate?.decryptChannelMessage(encryptedContent, channel)
             }
             
+            // BitNow encrypted control-plane callbacks
+            override fun onBitNowProfileRequest(peerID: String) {
+                val profile = com.bitchat.android.bitnow.BitNowProfileStore.load(context) ?: return
+                if (!com.bitchat.android.bitnow.BitNowAvailabilityStore.isPersistedAvailable(
+                        context,
+                        profile
+                    )
+                ) return
+                val remoteSupportsBitNow = peerManager.getPeerInfo(peerID)
+                    ?.capabilities
+                    ?.contains(PeerCapabilities.BITNOW_AVAILABLE)
+                    == true
+                if (!remoteSupportsBitNow) return
+
+                sendPrivateMessage(
+                    com.bitchat.android.bitnow.BitNowControlMessage.encodeProfile(profile),
+                    peerID,
+                    "BitNow",
+                    java.util.UUID.randomUUID().toString().uppercase()
+                )
+            }
+
             // Callbacks
             override fun onMessageReceived(message: BitchatMessage) {
                 // Private-message admission is authoritative. In particular, do not forward a
