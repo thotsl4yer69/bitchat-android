@@ -479,6 +479,7 @@ class ChatViewModel(
                         }
                     }
                     BitNowRelationshipStore.clearAll(getApplication())
+                    mesh.sendBroadcastAnnounce()
                 }
                 BitNowRegistry.prune()
                 BitNowRelationshipStore.pruneExpired(getApplication())
@@ -735,6 +736,7 @@ class ChatViewModel(
         if (!safe.visibleNearby) {
             BitNowAvailabilityStore.stop(getApplication())
             BitNowRelationshipStore.clearAll(getApplication())
+            mesh.sendBroadcastAnnounce()
             return
         }
         if (BitNowAvailabilityStore.isAvailable(safe)) {
