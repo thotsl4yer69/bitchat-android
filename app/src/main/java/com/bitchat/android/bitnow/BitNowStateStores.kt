@@ -160,7 +160,7 @@ object BitNowSafetyStore {
         BitNowRelationshipStore.clearPeer(context, id)
     }
 
-    fun reportAndBlock(
+    fun recordReport(
         context: Context,
         peerId: String,
         reason: String,
@@ -170,10 +170,19 @@ object BitNowSafetyStore {
         val reports = prefs.getStringSet(KEY_REPORTS, emptySet())?.toMutableSet() ?: mutableSetOf()
         reports += JSONObject()
             .put("peerId", peerId.lowercase())
-            .put("reason", reason.take(280))
+            .put("reason", reason.take(2_000))
             .put("reportedAtMs", nowMs)
             .toString()
         prefs.edit().putStringSet(KEY_REPORTS, reports.toList().takeLast(100).toSet()).apply()
+    }
+
+    fun reportAndBlock(
+        context: Context,
+        peerId: String,
+        reason: String,
+        nowMs: Long = System.currentTimeMillis()
+    ) {
+        recordReport(context, peerId, reason, nowMs)
         block(context, peerId)
     }
 
