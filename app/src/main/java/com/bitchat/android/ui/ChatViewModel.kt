@@ -795,7 +795,6 @@ class ChatViewModel(
         BitNowProfileStore.clear(getApplication())
         BitNowRelationshipStore.clearAll(getApplication())
         BitNowDiscoveryFilterStore.reset(getApplication())
-        BitNowSafetyStore.clear(getApplication())
         BitNowRegistry.clear()
         mesh.sendBroadcastAnnounce()
     }
