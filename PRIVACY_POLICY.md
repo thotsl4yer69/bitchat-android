@@ -1,156 +1,95 @@
-# bitchat Privacy Policy
+# BitNow Android Privacy Policy
 
-*Last updated: January 2025*
+*Last updated: 29 September 2026*
 
-## Our Commitment
-
-bitchat is designed with privacy as its foundation. We believe private communication is a fundamental human right. This policy explains how bitchat protects your privacy.
+BitNow is a proximity-first, accountless dating client built on the BitChat Android transport. The Android app is designed so that nearby discovery and dating state work without a BitNow-operated central profile database.
 
 ## Summary
 
-**WE DO NOT COLLECT ANY INFORMATION.**
+BitNow Android does not require a phone number, email address, cloud dating account or central profile service.
 
-- **No personal data collection** - We don't collect names, emails, or phone numbers
-- **No location data collection** - Location is accessed only for local processing (BLE/Geohash) and is never collected or sent to us
-- **Hybrid Functionality** - bitchat offers two modes of communication:
-  - **Bluetooth Mesh Chat**: This mode is completely offline, using peer-to-peer Bluetooth connections. It does not use any servers or internet connection.
-  - **Geohash Chat**: This mode uses an internet connection to communicate with others in a specific geographic area. It relies on Nostr relays for message transport.
-- **No tracking** - We have no analytics, telemetry, or user tracking
-- **Open source** - You can verify these claims by reading our code
+Dating profiles, preferences, availability timers, outgoing signals, blocks and local safety records are stored on the device. When you deliberately go live, selected profile data and dating signals are shared only with nearby peers that are also actively advertising BitNow support, using the existing authenticated encrypted private-message transport.
 
-## What Information bitchat Stores
+BitNow does not place your age, dating intent, identity, preferences, profile text or precise location in the public BLE announcement. The public announcement contains only protocol/feature capability bits, including a BitNow availability bit while your time-limited visibility window is active.
 
-### On Your Device Only
+## Information stored on your device
 
-1. **Identity Key** 
-   - A cryptographic key generated on first launch
-   - Stored locally in your device's secure storage
-   - Allows you to maintain "favorite" relationships across app restarts
-   - Never leaves your device
+BitNow Android can store:
 
-2. **Nickname**
-   - The display name you choose (or auto-generated)
-   - Stored only on your device
-   - Shared with peers you communicate with
+- your display name and adult age;
+- whether to show your exact age or only "18+";
+- optional identity, pronouns, headline and profile/about text;
+- the identities you are open to meeting;
+- your selected intent, such as meet now, tonight, meet first or chat first;
+- your discovery filters;
+- the expiry time for your current availability window;
+- outgoing dating signals, which expire after 45 minutes;
+- blocked peer identifiers;
+- local safety-report records created by "Report & block";
+- BitChat identity keys, conversation state and other transport data used by the underlying app.
 
-3. **Message History** (if enabled)
-   - When room owners enable retention, messages are saved locally
-   - Stored encrypted on your device
-   - You can delete this at any time
+The first BitNow profile is saved hidden. Nearby dating visibility starts only after you explicitly choose a 30-minute, 1-hour, 2-hour or 4-hour availability window. Expiry turns dating visibility off and clears active dating signals.
 
-4. **Favorite Peers**
-   - Public keys of peers you mark as favorites
-   - Stored only on your device
-   - Allows you to recognize these peers in future sessions
+## Information shared with nearby BitNow peers
 
-### Temporary Session Data
+While you are live, BitNow can share the following through authenticated encrypted one-to-one control messages:
 
-During each session, bitchat temporarily maintains:
-- Active peer connections (forgotten when app closes)
-- Routing information for message delivery
-- Cached messages for offline peers (12 hours max)
+- age, or "18+" if you hide your exact age;
+- optional identity and pronouns;
+- headline and about/boundaries text;
+- selected intent;
+- the identities you are open to meeting;
+- a dating signal when you choose "Interested."
 
-## What Information is Shared
+BitNow does not broadcast those profile fields in the BLE announcement itself. Android shares dating controls only with peers that are also actively advertising the BitNow capability.
 
-### With Other bitchat Users
+Nearby cards use coarse Bluetooth signal bands such as "very close", "close" or "nearby". BitNow does not present a precise distance or map pin from BLE signal strength.
 
-When you use bitchat, nearby peers can see:
-- Your chosen nickname
-- Your ephemeral public key (changes each session)
-- Messages you send to public rooms or directly to them
-- Your approximate Bluetooth signal strength (for connection quality)
+## Matches and messages
 
-### With Room Members
+A BitNow match exists when both peers have active dating signals for each other. Signals expire automatically after 45 minutes.
 
-When you join a password-protected room:
-- Your messages are visible to others with the password
-- Your nickname appears in the member list
-- Room owners can see you've joined
+Direct messages use the existing BitChat encrypted private-message path. BitNow dating controls use that same authenticated encrypted transport and are consumed as application metadata rather than displayed as chat messages.
 
-## What We DON'T Do
+## Blocks and reports
 
-bitchat **never**:
-- Collects personal information
-- Collects location history
-- Transmits any data to us (the developers)
-- Stores data on servers
-- Shares data with third parties
-- Uses analytics or telemetry
-- Creates user profiles
-- Requires registration
+Blocking removes the peer from BitNow discovery and clears local dating state for that peer. Android's current "Report & block" flow stores a bounded safety record locally on the device and blocks the peer. This Android build does not silently upload that report to a BitNow server.
 
-## Encryption
+Erasing the dating profile and preferences does not erase safety blocks or safety-report records. This prevents a privacy reset from unintentionally re-exposing blocked peers.
 
-All private messages use end-to-end encryption:
-- **X25519** for key exchange
-- **AES-256-GCM** for message encryption
-- **Ed25519** for digital signatures
-- **Argon2id** for password-protected rooms
+## Location and nearby permissions
 
-## Your Rights
+BitNow uses Bluetooth discovery to find nearby compatible peers. Android versions and device vendors may require Nearby Devices and/or Location permissions for BLE scanning.
 
-You have complete control:
-- **Delete Everything**: Triple-tap the logo to instantly wipe all data
-- **Leave Anytime**: Close the app and your presence disappears
-- **No Account**: Nothing to delete from servers because there are none
-- **Portability**: Your data never leaves your device unless you export it
+The underlying BitChat transport also contains optional geohash/Nostr features. If you use a feature that derives a geohash from device location, the app may access location locally to calculate that coarse area. Precise GPS coordinates are not part of the BitNow dating profile or BitNow BLE capability announcement.
 
-## Location Data & Permissions
+## Network transport
 
-To provide the core functionality of bitchat, we access your device's location data. This access is necessary for the following specific purposes:
+Core nearby BitNow discovery can operate over BLE without a BitNow-operated central dating service. The underlying BitChat client can also use internet transports such as Nostr relays when those features are enabled. Data sent to third-party decentralized relays is subject to the behavior and retention of those relays.
 
-### 1. Bluetooth Low Energy (BLE) Scanning
-- **Why we need it:** The Android operating system requires Location permission to scan for nearby Bluetooth LE devices (especially on Android 11 and lower). This is a system-level requirement because Bluetooth scans can theoretically be used to derive location.
-- **How we use it:** We use this permission strictly to discover other bitchat peers nearby for the "Bluetooth Mesh Chat" mode.
-- **Privacy protection:** We do not record or store your location during this process. The data is processed instantaneously by the Android system to facilitate the connection.
+## Age restriction
 
-### 2. Geohash Chat Functionality
-- **Why we need it:** The "Geohash Chat" mode allows you to communicate with others in your approximate geographic area.
-- **How we use it:** If you enable this mode, we access your location to calculate a "geohash" (a short alphanumeric string representing a geographic region). This geohash is used to find and subscribe to relevant channels on decentralized Nostr relays.
-- **Privacy protection:** 
-  - Your precise GPS coordinates are **never** sent to any server or peer.
-  - Only the coarse geohash (representing an area, not a pinpoint) is shared with the Nostr network.
-  - You can use the "Bluetooth Mesh Chat" mode without this feature if you prefer.
+BitNow is for adults aged 18 or older. Profile creation requires an 18+ confirmation and an age from 18 through 99. The app also rejects selected profile text patterns that explicitly claim the user is under 18.
 
-**We do not collect, store, or share your location history.** Location data is processed locally on your device to enable these specific features.
+This local gate is not government-ID age verification and should not be represented as one.
 
-## Children's Privacy
+## Your controls
 
-bitchat does not knowingly collect information from children. The app has no age verification because it collects no personal information from anyone.
+You can:
 
-## Data Retention
+- hide immediately at any time;
+- allow a visibility window to expire automatically;
+- clear active dating signals;
+- edit your profile and filters;
+- block or report-and-block a peer;
+- erase your BitNow dating profile, preferences, signals and discovery filters from the device while preserving safety blocks.
 
-- **Messages**: Deleted from memory when app closes (unless room retention is enabled)
-- **Identity Key**: Persists until you delete the app
-- **Favorites**: Persist until you remove them or delete the app
-- **Everything Else**: Exists only during active sessions
+Deleting the application or clearing its app data removes ordinary local application state according to Android's storage behavior.
 
-## Security Measures
+## Analytics and advertising
 
-- All communication is encrypted
-- No data transmitted to servers (there are none)
-- Open source code for public audit
-- Regular security updates
-- Cryptographic signatures prevent tampering
+The BitNow layer added by this project does not add advertising SDKs or behavioral analytics. Upstream transport code and any optional internet relay behavior remain separately auditable in this repository.
 
-## Changes to This Policy
+## Source and provenance
 
-If we update this policy:
-- The "Last updated" date will change
-- The updated policy will be included in the app
-- No retroactive changes can affect data (since we don't collect any)
-
-## Contact
-
-bitchat is an open source project. For privacy questions:
-- Review our code: https://github.com/yourusername/bitchat
-- Open an issue on GitHub
-- Join the discussion in public rooms
-
-## Philosophy
-
-Privacy isn't just a feature—it's the entire point. bitchat proves that modern communication doesn't require surrendering your privacy. No accounts, no servers, no surveillance. Just people talking freely.
-
----
-
-*This policy is released into the public domain under The Unlicense, just like bitchat itself.*
+BitNow Android is based on the open-source BitChat Android project. Upstream provenance and licensing are documented in `UPSTREAM.md` and `UPSTREAM_COMMIT`.
