@@ -225,7 +225,9 @@ tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
     // Mockito dependency as an agent before the test JVM starts instead.
     jvmArgumentProviders.add(object : org.gradle.process.CommandLineArgumentProvider {
         @get:org.gradle.api.tasks.Classpath
-        val agentClasspath = classpath.filter { it.name.startsWith("mockito-core-") }
+        val agentClasspath = objects.fileCollection().from(provider {
+            classpath.filter { it.name.startsWith("mockito-core-") }
+        })
 
         override fun asArguments() = listOf("-javaagent:${agentClasspath.singleFile.absolutePath}")
     })
