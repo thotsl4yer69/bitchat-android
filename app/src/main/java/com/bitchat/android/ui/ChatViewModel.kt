@@ -817,8 +817,7 @@ class ChatViewModel(
     private fun isBitNowAvailablePeer(peerID: String): Boolean =
         mesh.getPeerInfo(peerID)
             ?.capabilities
-            ?.contains(com.bitchat.android.model.PeerCapabilities.BITNOW_AVAILABLE)
-            == true
+            ?.contains(com.bitchat.android.model.PeerCapabilities.BITNOW_AVAILABLE) == true
 
     private fun publishBitNowProfile(profile: BitNowProfile) {
         connectedPeers.value

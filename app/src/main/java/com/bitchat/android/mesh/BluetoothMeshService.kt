@@ -503,8 +503,7 @@ class BluetoothMeshService(private val context: Context) : TransportBridgeServic
                 ) return
                 val remoteSupportsBitNow = peerManager.getPeerInfo(peerID)
                     ?.capabilities
-                    ?.contains(PeerCapabilities.BITNOW_AVAILABLE)
-                    == true
+                    ?.contains(PeerCapabilities.BITNOW_AVAILABLE) == true
                 if (!remoteSupportsBitNow) return
 
                 sendPrivateMessage(

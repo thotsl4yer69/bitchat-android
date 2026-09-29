@@ -339,10 +339,10 @@ class MainActivity : OrientationAwareActivity() {
                 if (bitNowProfileReady) {
                     BitNowRootScreen(viewModel = chatViewModel)
                 } else {
-                    BitNowProfileSetupScreen { profile ->
+                    BitNowProfileSetupScreen(onSave = { profile ->
                         chatViewModel.saveBitNowProfile(profile)
                         bitNowProfileReady = true
-                    }
+                    })
                 }
             }
             

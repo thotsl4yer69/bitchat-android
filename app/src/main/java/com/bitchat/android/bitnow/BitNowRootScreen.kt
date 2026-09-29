@@ -428,7 +428,11 @@ private fun BitNowNearbyScreen(
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         TextButton(onClick = { viewModel.blockBitNowPeer(peerId) }) { Text("Block") }
                         TextButton(onClick = {
-                            viewModel.reportBitNowPeer(peerId, "Reported from nearby profile")
+                            viewModel.recordBitNowReport(
+                                peerId,
+                                "Reported from nearby profile",
+                                alsoBlock = true
+                            )
                         }) { Text("Report & block") }
                     }
                 }
