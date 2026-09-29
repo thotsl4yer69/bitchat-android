@@ -221,6 +221,14 @@ dependencies {
 // Robolectric resolves Android runtime jars itself (outside Gradle dependency resolution).
 // Its legacy repo1 endpoint rejects cold GitHub-hosted runners with HTTP 403.
 tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
+    // JDK 21 can restrict dynamic self-attachment. Load the existing, verified
+    // Mockito dependency as an agent before the test JVM starts instead.
+    jvmArgumentProviders.add(object : org.gradle.process.CommandLineArgumentProvider {
+        @get:org.gradle.api.tasks.Classpath
+        val agentClasspath = classpath.filter { it.name.startsWith("mockito-core-") }
+
+        override fun asArguments() = listOf("-javaagent:${agentClasspath.singleFile.absolutePath}")
+    })
     systemProperty(
         "robolectric.dependency.repo.url",
         "https://repo.maven.apache.org/maven2"
