@@ -2,110 +2,115 @@ package com.bitchat.android.ui.theme
 
 import android.app.Activity
 import android.os.Build
+import android.view.View
+import android.view.WindowInsetsController
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
-import androidx.core.view.WindowCompat
 
-// Material Design 3 Color Scheme
-private val DarkColorScheme = darkColorScheme(
-    primary = Color(0xFF4FC3F7),
-    onPrimary = Color(0xFF003258),
-    primaryContainer = Color(0xFF004B6F),
-    onPrimaryContainer = Color(0xFFB8E6FF),
-    secondary = Color(0xFF81C784),
-    onSecondary = Color(0xFF003A16),
-    secondaryContainer = Color(0xFF00531E),
-    onSecondaryContainer = Color(0xFF9DF5A2),
-    tertiary = Color(0xFFFFB74D),
-    onTertiary = Color(0xFF3E2D00),
-    tertiaryContainer = Color(0xFF584200),
-    onTertiaryContainer = Color(0xFFFFDEA6),
-    error = Color(0xFFE57373),
-    errorContainer = Color(0xFF93000A),
-    onError = Color(0xFF690005),
-    onErrorContainer = Color(0xFFFFDAD6),
-    background = Color(0xFF0D1117),
-    onBackground = Color(0xFFE6EDF3),
-    surface = Color(0xFF161B22),
-    onSurface = Color(0xFFE6EDF3),
-    surfaceVariant = Color(0xFF21262D),
-    onSurfaceVariant = Color(0xFFC9D1D9),
-    outline = Color(0xFF30363D),
-    inverseOnSurface = Color(0xFF0D1117),
-    inverseSurface = Color(0xFFE6EDF3),
-    inversePrimary = Color(0xFF0969DA),
-    surfaceTint = Color(0xFF4FC3F7),
-    outlineVariant = Color(0xFF21262D),
-    scrim = Color(0xFF000000),
+// Standard UI semantics live in Material so stock components and custom Bitchat composables
+// share one source of truth. LocalBitchatPalette below only supplies app-specific extra colors.
+internal val DarkBitchatColorScheme = darkColorScheme(
+    primary = Color(0xFF32D74B),
+    onPrimary = Color.Black,
+    primaryContainer = Color(0xFF163D1D),
+    onPrimaryContainer = Color(0xFFB8F5C1),
+    secondary = Color(0xFF0A84FF),
+    onSecondary = Color.Black,
+    secondaryContainer = Color(0xFF082E54),
+    onSecondaryContainer = Color(0xFFC2E0FF),
+    tertiary = DarkBitchatPalette.accentOrange,
+    onTertiary = Color.Black,
+    background = Color(0xFF000000),
+    onBackground = Color(0xFFF5F5F5),
+    surface = Color(0xFF0E150E),
+    onSurface = Color(0xFFF5F5F5),
+    surfaceVariant = Color(0xFF182118),
+    onSurfaceVariant = Color(0xFF9AA69A),
+    outline = Color(0xFF2A3A2A),
+    outlineVariant = Color(0xFF1C271C),
+    error = Color(0xFFFF453A),
+    onError = Color.Black
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = Color(0xFF0969DA),
-    onPrimary = Color(0xFFFFFFFF),
-    primaryContainer = Color(0xFFB8E6FF),
-    onPrimaryContainer = Color(0xFF003258),
-    secondary = Color(0xFF2D5A41),
-    onSecondary = Color(0xFFFFFFFF),
-    secondaryContainer = Color(0xFF9DF5A2),
-    onSecondaryContainer = Color(0xFF003A16),
-    tertiary = Color(0xFF7A5900),
-    onTertiary = Color(0xFFFFFFFF),
-    tertiaryContainer = Color(0xFFFFDEA6),
-    onTertiaryContainer = Color(0xFF3E2D00),
-    error = Color(0xFFBA1A1A),
-    errorContainer = Color(0xFFFFDAD6),
-    onError = Color(0xFFFFFFFF),
-    onErrorContainer = Color(0xFF410002),
-    background = Color(0xFFF6F8FA),
-    onBackground = Color(0xFF0D1117),
-    surface = Color(0xFFFFFFFF),
-    onSurface = Color(0xFF0D1117),
-    surfaceVariant = Color(0xFFF6F8FA),
-    onSurfaceVariant = Color(0xFF4A5568),
-    outline = Color(0xFFD0D7DE),
-    inverseOnSurface = Color(0xFFE6EDF3),
-    inverseSurface = Color(0xFF0D1117),
-    inversePrimary = Color(0xFF4FC3F7),
-    surfaceTint = Color(0xFF0969DA),
-    outlineVariant = Color(0xFFE1E4E8),
-    scrim = Color(0xFF000000),
+internal val LightBitchatColorScheme = lightColorScheme(
+    primary = Color(0xFF248A3D),
+    onPrimary = Color.White,
+    primaryContainer = Color(0xFFD5F1D8),
+    onPrimaryContainer = Color(0xFF0A3212),
+    secondary = Color(0xFF007AFF),
+    onSecondary = Color.White,
+    secondaryContainer = Color(0xFFD6E9FF),
+    onSecondaryContainer = Color(0xFF002C5C),
+    tertiary = LightBitchatPalette.accentOrange,
+    onTertiary = Color.Black,
+    background = Color(0xFFFFFFFF),
+    onBackground = Color(0xFF131A13),
+    surface = Color(0xFFF2F6F2),
+    onSurface = Color(0xFF131A13),
+    surfaceVariant = Color(0xFFE7EDE7),
+    onSurfaceVariant = Color(0xFF4C574C),
+    outline = Color(0xFFCBD6CB),
+    outlineVariant = Color(0xFFDEE6DE),
+    error = Color(0xFFD70015),
+    onError = Color.White
 )
 
 @Composable
-fun BitChatTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+fun BitchatTheme(
+    darkTheme: Boolean? = null,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+    // App-level override from ThemePreferenceManager
+    val themePref by ThemePreferenceManager.themeFlow.collectAsState(initial = ThemePreference.System)
+    val shouldUseDark = when (darkTheme) {
+        true -> true
+        false -> false
+        null -> when (themePref) {
+            ThemePreference.Dark -> true
+            ThemePreference.Light -> false
+            ThemePreference.System -> isSystemInDarkTheme()
         }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
     }
-    
+
+    val colorScheme = if (shouldUseDark) DarkBitchatColorScheme else LightBitchatColorScheme
+    val palette = if (shouldUseDark) DarkBitchatPalette else LightBitchatPalette
+
     val view = LocalView.current
-    if (!view.isInEditMode) {
-        SideEffect {
-            val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.primary.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
+    SideEffect {
+        (view.context as? Activity)?.window?.let { window ->
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                window.insetsController?.setSystemBarsAppearance(
+                    if (!shouldUseDark) WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS else 0,
+                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                window.decorView.systemUiVisibility = if (!shouldUseDark) {
+                    View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                } else 0
+            }
+            window.navigationBarColor = colorScheme.background.toArgb()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                window.isNavigationBarContrastEnforced = false
+            }
         }
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
+    CompositionLocalProvider(LocalBitchatPalette provides palette) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = Typography,
+            content = content
+        )
+    }
 }

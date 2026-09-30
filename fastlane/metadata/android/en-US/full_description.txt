@@ -1,0 +1,23 @@
+BitNow is an adults-only, proximity-first dating app built on encrypted peer-to-peer BitChat transport.
+
+Create a local profile, stay hidden by default, then choose a 30-minute, 1-hour, 2-hour or 4-hour window when you want to be discoverable nearby. BitNow uses Bluetooth mesh discovery and coarse signal bands instead of pretending BLE can provide exact distance.
+
+When both people are actively available on BitNow, profiles and dating signals are exchanged through authenticated encrypted one-to-one messages. Interest signals expire after 45 minutes. Mutual signals create a match and you can move directly into encrypted private chat.
+
+Features:
+• 18+ local profile and adult confirmation
+• no phone number or central dating account
+• hidden-by-default visibility
+• timed nearby availability
+• age, identity and intent discovery filters
+• coarse proximity labels, not a map pin
+• encrypted profile exchange
+• 45-minute interest signals
+• mutual matches
+• block and report-and-block controls
+• privacy reset for local dating data
+• encrypted direct messaging
+• offline Bluetooth mesh operation
+• optional BitChat/Nostr transport features retained from upstream
+
+BitNow does not put your profile, dating preferences or precise location in the public Bluetooth announcement. The public capability bit only indicates active BitNow availability during the visibility window.
