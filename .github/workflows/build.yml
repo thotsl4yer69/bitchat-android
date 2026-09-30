@@ -2,7 +2,7 @@ name: BitNow Android
 
 on:
   push:
-    branches: [ bitnow/upstream-full-rebrand, agent/finish-bitnow-v1 ]
+    branches: [ main, bitnow/upstream-full-rebrand, agent/finish-bitnow-v1 ]
   pull_request:
     branches: [ main, bitnow/upstream-full-rebrand ]
   workflow_dispatch:
